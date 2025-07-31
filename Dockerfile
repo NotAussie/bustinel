@@ -1,5 +1,5 @@
 FROM python:3.13-slim-bookworm
-LABEL org.opencontainers.image.source=
+LABEL org.opencontainers.image.source="https://github.com/notaussie/bustinel"
 
 WORKDIR /app
 
