@@ -1,0 +1,61 @@
+# Bustinel
+
+A tool for generating historical vehicle trip data for analysation and statistical purposes.
+
+## Why create this?
+
+The story that lead to Bustinel's creation is a weird and kinda goofy one. I'm a public transport photographer and enthusiast, my local transit has some pretty cool experimental vehicles and I've had them on my photography bucket list for awhile, annoyingly they aren't in service often and when they are they only service a select few routes, so I thought making an entire framework for generating historical trips would be a fun way to solve this problem. _(Yes I know I could of rang my agency, but what's the fun in that?)_
+
+## Usage
+
+I recommend hosting Bustinel via docker compose, especially if you're using multiple sources _(for example if you wanted to track multiple agencies or multiple agency sources)_. To use it with Docker compose you'll need a `compose.yml` file, we provide an example of what that'll look like inside `example.compose.yml`, I recommend using that as a base.
+
+An example `compose.yml` file would look like this:
+
+```yaml
+services:
+  analytics:
+    image: notaussie/bustinel:latest
+    depends_on:
+      - mongo
+    environment:
+      MONGODB_URL: mongodb://mongo:27017/bustinel
+      GOOGLE_TRANSIT_FILE_URL: https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip
+      FEED_URL: https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions
+      CONTACT_EMAIL: username@example.com
+    volumes:
+      - bustinel-analytics:/app/data
+    restart: always
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - bustinel-mongo:/data/db
+
+volumes:
+  bustinel-mongo:
+  bustinel-analytics:
+```
+
+## Environment Variables
+
+Configurable environment variables for Bustinel. Any value shown as `N/A` must be provided or the program will exit on start.
+
+| Variable Name             | Description                                                   | Default Value |
+| ------------------------- | ------------------------------------------------------------- | ------------- |
+| `MONGODB_URL`             | The MongoDB connection URL for the Bustinel database.         | N/A           |
+| `FEED_URL`                | The URL to the GTFS‑RT feed for vehicle positions.            | N/A           |
+| `GOOGLE_TRANSIT_FILE_URL` | The URL to the Google Transit feed file.                      | N/A           |
+| `FEED_UPDATE_INTERVAL`    | The interval in seconds to update the feed data.              | 60            |
+| `CONTACT_EMAIL`           | The host's contact email address for complaints or inquiries. | N/A           |
+
+## HTTP Headers
+
+Enforced HTTP headers for requests made by Bustinel.
+
+| Header Name  | Description                                                             |
+| ------------ | ----------------------------------------------------------------------- |
+| `User-Agent` | Bustinel <https://github.com/notaussie/bustinel>; contact: _Your email_ |
+| `From`       | _Your email_                                                            |
+| `Accept`     | application/x-protobuf                                                  |

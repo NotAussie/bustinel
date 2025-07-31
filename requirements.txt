@@ -1,0 +1,6 @@
+beanie[encryption,snappy]>=2.0.0
+pydantic>=2.11.7
+aiohttp>=3.12.14
+python-json-logger>=3.3.0
+gtfs-realtime-bindings>=1.0.0
+backoff>=2.2.1
