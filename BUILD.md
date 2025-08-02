@@ -9,5 +9,5 @@ docker build . \
 To push the image to GitHub Container Registry, use:
 
 ```bash
-docker push ghcr.io/notaussie/bustinel:latest && docker push ghcr.io/notaussie/bustinel:1.*.*
+docker push ghcr.io/notaussie/bustinel:latest && docker push ghcr.io/notaussie/bustinel:stable && docker push ghcr.io/notaussie/bustinel:1.*.*
 ```
