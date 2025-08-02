@@ -10,6 +10,7 @@ Raises:
 
 import os
 from pathlib import Path
+import logging
 
 _ENV = os.environ
 
@@ -73,8 +74,39 @@ _REQUIRED_HEADERS: dict[str, str] = {
         f"Bustinel <https://github.com/notaussie/bustinel>; contact: {CONTACT_EMAIL}"
     ),
     "From": CONTACT_EMAIL,
-    "Accept": "application/x-protobuf",
+    "Accept": "application/x-google-protobuf, application/x-protobuf",
 }
 
 HEADERS: dict[str, str] = {**_HEADERS, **_REQUIRED_HEADERS}
 """HTTP headers to be used in every outbound request."""
+
+SENTRY_DSN: str | None = _ENV.get("SENTRY_DSN", None)
+"""Sentry DSN for error reporting. (default: None)"""
+
+_SENTRY_TRACES_SAMPLE_RATE = _ENV.get("SENTRY_TRACES_SAMPLE_RATE", "0.5")
+try:
+    SENTRY_TRACES_SAMPLE_RATE: float = float(_SENTRY_TRACES_SAMPLE_RATE)
+    """Sentry traces sample rate for performance monitoring. (default: 0.5)"""
+    if not (0.0 <= SENTRY_TRACES_SAMPLE_RATE <= 1.0):
+        raise ValueError("SENTRY_TRACES_SAMPLE_RATE must be between 0.0 and 1.")
+except ValueError:
+    raise ValueError(
+        f"Invalid SENTRY_TRACES_SAMPLE_RATE value: {_SENTRY_TRACES_SAMPLE_RATE}. "
+        "Must be a float between 0.0 and 1.0."
+    ) from None
+
+ENVIRONMENT: str = _ENV.get("ENVIRONMENT", "production")
+"""The environment in which the application is running (e.g., 'production', 'development', 'testing')."""
+
+if ENVIRONMENT not in ("production", "development", "testing"):
+    raise ValueError(
+        f"Invalid ENVIRONMENT value: {ENVIRONMENT}. "
+        "Must be one of 'production', 'development', or 'testing'."
+    )
+
+_LOG_LEVEL: int = getattr(
+    logging, _ENV.get("LOG_LEVEL", "INFO").upper(), logging.INFO
+)
+
+LOG_LEVEL: int = _LOG_LEVEL
+"""Logging level for the application (default: 'INFO')."""
