@@ -24,7 +24,7 @@ _FEED_URL_TEMP = _ENV.get("FEED_URL")
 if _FEED_URL_TEMP is None:
     raise ValueError("FEED_URL environment variable is not set.")
 FEED_URL: str = _FEED_URL_TEMP
-"""The URL to the GTFS‑RT feed for vehicle positions."""
+"""The URL to the GTFS-RT feed for vehicle positions."""
 
 _GOOGLE_TRANSIT_FILE_URL_TEMP = _ENV.get("GOOGLE_TRANSIT_FILE_URL")
 if _GOOGLE_TRANSIT_FILE_URL_TEMP is None:
@@ -55,7 +55,7 @@ _HEADERS_PATH = Path("data") / "headers.txt"
 def _load_headers(path: Path) -> dict[str, str]:
     """Read headers from file and return a mapping, or empty dict if missing."""
     try:
-        with path.open("r", encoding="utf‑8") as f:
+        with path.open("r", encoding="utf-8") as f:
             headers: dict[str, str] = {}
             for line in f:
                 if ":" not in line:
@@ -69,16 +69,22 @@ def _load_headers(path: Path) -> dict[str, str]:
 
 _HEADERS: dict[str, str] = _load_headers(_HEADERS_PATH)
 
+ACCEPT = _ENV.get(
+    "ACCEPT", "application/x-google-protobuf, application/x-protobuf"
+)
+"""The Accept header to be used for making requests to GTFS Realtime feeds. (default: 'application/x-google-protobuf, application/x-protobuf')"""
+
 _REQUIRED_HEADERS: dict[str, str] = {
     "User-Agent": (
         f"Bustinel <https://github.com/notaussie/bustinel>; contact: {CONTACT_EMAIL}"
     ),
     "From": CONTACT_EMAIL,
-    "Accept": "application/x-google-protobuf, application/x-protobuf",
 }
+
 
 HEADERS: dict[str, str] = {**_HEADERS, **_REQUIRED_HEADERS}
 """HTTP headers to be used in every outbound request."""
+
 
 SENTRY_DSN: str | None = _ENV.get("SENTRY_DSN", None)
 """Sentry DSN for error reporting. (default: None)"""

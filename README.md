@@ -1,7 +1,5 @@
 [![Adelaide Metro bus #1121 taken by NotAussie](https://github.com/user-attachments/assets/093e6940-72eb-40f7-ac73-30b50a46e0bc)](https://github.com/notaussie)
 
-
-
 # Bustinel
 
 A tool for generating historical vehicle trip data for analysation and statistical purposes.
@@ -43,17 +41,18 @@ volumes:
 
 Configurable environment variables for Bustinel. Values labelled with required must be set before running the application, if these aren't provided the program will early exit with an error.
 
-| Variable Name               | Description                                                                             | Default Value | Required |
-| --------------------------- | --------------------------------------------------------------------------------------- | ------------- | -------- |
-| `MONGODB_URL`               | The MongoDB connection URL for the Bustinel database.                                   | N/A           | True     |
-| `FEED_URL`                  | The URL to the GTFS‑RT feed for vehicle positions.                                      | N/A           | True     |
-| `GOOGLE_TRANSIT_FILE_URL`   | The URL to the Google Transit feed file.                                                | N/A           | True     |
-| `FEED_UPDATE_INTERVAL`      | The interval in seconds to update the feed data.                                        | 60            | False    |
-| `CONTACT_EMAIL`             | The host's contact email address for complaints or inquiries.                           | N/A           | True     |
-| `LOG_LEVEL`                 | The logging level for the application.                                                  | info          | False    |
-| `ENVIRONMENT`               | The environment the application is running in (e.g., production, development, testing). | production    | False    |
-| `SENTRY_DSN`                | The Sentry DSN for error reporting. (Recommended)                                       | N/A           | False    |
-| `SENTRY_TRACES_SAMPLE_RATE` | The sample rate for traces sent to Sentry.                                              | 0.5           | False    |
+| Variable Name               | Description                                                                             | Default Value                                           | Required |
+| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------- |
+| `MONGODB_URL`               | The MongoDB connection URL for the Bustinel database.                                   | N/A                                                     | True     |
+| `FEED_URL`                  | The URL to the GTFS‑RT feed for vehicle positions.                                      | N/A                                                     | True     |
+| `GOOGLE_TRANSIT_FILE_URL`   | The URL to the Google Transit feed file.                                                | N/A                                                     | True     |
+| `FEED_UPDATE_INTERVAL`      | The interval in seconds to update the feed data.                                        | 60                                                      | False    |
+| `CONTACT_EMAIL`             | The host's contact email address for complaints or inquiries.                           | N/A                                                     | True     |
+| `LOG_LEVEL`                 | The logging level for the application.                                                  | info                                                    | False    |
+| `ENVIRONMENT`               | The environment the application is running in (e.g., production, development, testing). | production                                              | False    |
+| `ACCEPT`                    | The Accept header to be used for making requests to GTFS-RT feeds.                      | `application/x-google-protobuf, application/x-protobuf` | False    |
+| `SENTRY_DSN`                | The Sentry DSN for error reporting. (Recommended)                                       | N/A                                                     | False    |
+| `SENTRY_TRACES_SAMPLE_RATE` | The sample rate for traces sent to Sentry.                                              | 0.5                                                     | False    |
 
 ## HTTP Headers
 
