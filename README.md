@@ -40,15 +40,17 @@ volumes:
 
 ## Environment Variables
 
-Configurable environment variables for Bustinel. Any value shown as `N/A` must be provided or the program will exit on start.
+Configurable environment variables for Bustinel. Values with `N/S
 
-| Variable Name             | Description                                                   | Default Value |
-| ------------------------- | ------------------------------------------------------------- | ------------- |
-| `MONGODB_URL`             | The MongoDB connection URL for the Bustinel database.         | N/A           |
-| `FEED_URL`                | The URL to the GTFS‑RT feed for vehicle positions.            | N/A           |
-| `GOOGLE_TRANSIT_FILE_URL` | The URL to the Google Transit feed file.                      | N/A           |
-| `FEED_UPDATE_INTERVAL`    | The interval in seconds to update the feed data.              | 60            |
-| `CONTACT_EMAIL`           | The host's contact email address for complaints or inquiries. | N/A           |
+| Variable Name             | Description                                                   | Default Value | Required |
+| ------------------------- | ------------------------------------------------------------- | ------------- | -------- |
+| `MONGODB_URL`             | The MongoDB connection URL for the Bustinel database.         | N/A           | True     |
+| `FEED_URL`                | The URL to the GTFS‑RT feed for vehicle positions.            | N/A           | True     |
+| `GOOGLE_TRANSIT_FILE_URL` | The URL to the Google Transit feed file.                      | N/A           | True     |
+| `FEED_UPDATE_INTERVAL`    | The interval in seconds to update the feed data.              | 60            | False    |
+| `CONTACT_EMAIL`           | The host's contact email address for complaints or inquiries. | N/A           | True     |
+| `LOG_LEVEL`               | The logging level for the application.                        | info          | False    |
+| `SENTRY_DSN`              | The Sentry DSN for error reporting. (Recommended)             | N/A           | False    |
 
 ## HTTP Headers
 
@@ -58,4 +60,4 @@ Enforced HTTP headers for requests made by Bustinel.
 | ------------ | ----------------------------------------------------------------------- |
 | `User-Agent` | Bustinel <https://github.com/notaussie/bustinel>; contact: _Your email_ |
 | `From`       | _Your email_                                                            |
-| `Accept`     | application/x-protobuf                                                  |
+| `Accept`     | application/x-google-protobuf, application/x-protobuf                   |
