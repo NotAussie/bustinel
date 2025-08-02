@@ -40,19 +40,20 @@ def _sentry_before_send(event: Event, _):
     return event
 
 
-sentry_sdk.init(
-    dsn=config.SENTRY_DSN,
-    integrations=[
-        LoggingIntegration(
-            level=config.LOG_LEVEL,
-            event_level=logging.ERROR,
-        ),
-        AsyncioIntegration(),
-        AioHttpIntegration(),
-    ],
-    traces_sample_rate=0.1,
-    before_send=_sentry_before_send,
-)
+if config.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=config.SENTRY_DSN,
+        integrations=[
+            LoggingIntegration(
+                level=config.LOG_LEVEL,
+                event_level=logging.ERROR,
+            ),
+            AsyncioIntegration(),
+            AioHttpIntegration(),
+        ],
+        traces_sample_rate=0.1,
+        before_send=_sentry_before_send,
+    )
 
 # Initialisation
 os.makedirs("data", exist_ok=True)
