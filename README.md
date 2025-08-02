@@ -15,7 +15,7 @@ An example `compose.yml` file would look like this:
 ```yaml
 services:
   analytics:
-    image: notaussie/bustinel:latest
+    image: ghcr.io/notaussie/bustinel:latest
     depends_on:
       - mongo
     environment:
@@ -23,8 +23,6 @@ services:
       GOOGLE_TRANSIT_FILE_URL: https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip
       FEED_URL: https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions
       CONTACT_EMAIL: username@example.com
-    volumes:
-      - bustinel-analytics:/app/data
     restart: always
 
   mongo:
@@ -35,7 +33,6 @@ services:
 
 volumes:
   bustinel-mongo:
-  bustinel-analytics:
 ```
 
 ## Environment Variables
