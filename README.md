@@ -40,7 +40,7 @@ volumes:
 
 ## Environment Variables
 
-Configurable environment variables for Bustinel. Values with `N/S
+Configurable environment variables for Bustinel. Values labelled with required must be set before running the application, if these aren't provided the program will early exit with an error.
 
 | Variable Name             | Description                                                   | Default Value | Required |
 | ------------------------- | ------------------------------------------------------------- | ------------- | -------- |
