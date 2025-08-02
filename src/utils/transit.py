@@ -10,7 +10,7 @@ import backoff
 from aiohttp import ClientSession, ClientError, ClientResponse
 from utils import config
 
-_LOGGER = getLogger(__name__)
+logger = getLogger(__name__)
 
 GTFS_DIR = os.path.join(".", "data", "transit")
 LOCK_FILE = os.path.join(".", "data", "transit-lock")
@@ -48,7 +48,7 @@ async def generate_gtfs_data() -> None:
         zipfile.BadZipFile: When ZIP archive is invalid.
         OSError: When writing to disk fails.
     """
-    _LOGGER.info("Downloading latest transit data")
+    logger.info("downloading latest transit data")
 
     async with ClientSession() as session:
         resp = await fetch_gtfs_feed(
@@ -63,11 +63,11 @@ async def generate_gtfs_data() -> None:
         tmp.flush()
         with zipfile.ZipFile(tmp, "r") as archive:
             archive.extractall(GTFS_DIR)
-    _LOGGER.info("Extracted new transit folder")
+    logger.info("extracted new transit folder")
 
     lock_ttl = datetime.now() + timedelta(days=LOCK_TTL_DAYS)
     await _write_lock_file(lock_ttl)
-    _LOGGER.info("Updated transit lock file")
+    logger.info("updated transit lock file")
 
 
 async def setup_transit_data() -> bool:
@@ -76,7 +76,7 @@ async def setup_transit_data() -> bool:
     Returns:
         bool: True when setup completes (regardless of regeneration).
     """
-    _LOGGER.info("Setting up transit data folder")
+    logger.info("setting up transit data folder")
 
     if not os.path.isdir(GTFS_DIR):
         await generate_gtfs_data()
@@ -87,25 +87,25 @@ async def setup_transit_data() -> bool:
             content = lock.read().splitlines()
             ttl_line = content[0]
     except (OSError, IndexError):
-        _LOGGER.exception("Lock file missing or malformed; regenerating")
+        logger.exception("lock file missing or malformed; regenerating")
         await generate_gtfs_data()
         return True
 
     if not ttl_line.startswith("ttl="):
-        _LOGGER.error("Lock file invalid; regenerating")
+        logger.error("lock file invalid; regenerating")
         await generate_gtfs_data()
         return True
 
     try:
         expiry_ts = float(ttl_line.removeprefix("ttl="))
         if datetime.now() > datetime.fromtimestamp(expiry_ts):
-            _LOGGER.warning("Transit data expired; rebuilding")
+            logger.warning("transit data expired; rebuilding")
             await generate_gtfs_data()
             return True
     except ValueError:
-        _LOGGER.exception("Could not parse TTL; regenerating")
+        logger.exception("could not parse ttl; regenerating")
         await generate_gtfs_data()
         return True
 
-    _LOGGER.info("Transit data up-to-date")
+    logger.info("transit data up-to-date")
     return True

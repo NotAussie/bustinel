@@ -54,7 +54,7 @@ class GTFSRT:
             KeyError,
         ) as e:
             logger.error(
-                "Failed to parse bytes into new feed content.", exc_info=e
+                "failed to parse bytes into new feed content", exc_info=e
             )
             return False
 
