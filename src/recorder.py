@@ -133,11 +133,11 @@ async def run_recorder() -> None:
                     "fetching gtfs-rt feed data",
                     extra={"feed_url": config.FEED_URL},
                 )
-                _headers = config.HEADERS.copy()
-                _headers["Accept"] = config.ACCEPT
+                headers = config.HEADERS.copy()
+                headers["Accept"] = config.ACCEPT
                 response = await session.get(
                     config.FEED_URL,
-                    headers=_headers,
+                    headers=headers,
                 )
                 response.raise_for_status()
                 data = await response.read()

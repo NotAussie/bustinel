@@ -93,7 +93,7 @@ _SENTRY_TRACES_SAMPLE_RATE = _ENV.get("SENTRY_TRACES_SAMPLE_RATE", "0.5")
 try:
     SENTRY_TRACES_SAMPLE_RATE: float = float(_SENTRY_TRACES_SAMPLE_RATE)
     """Sentry traces sample rate for performance monitoring. (default: 0.5)"""
-    if not (0.0 <= SENTRY_TRACES_SAMPLE_RATE <= 1.0):
+    if not 0.0 <= SENTRY_TRACES_SAMPLE_RATE <= 1.0:
         raise ValueError("SENTRY_TRACES_SAMPLE_RATE must be between 0.0 and 1.")
 except ValueError:
     raise ValueError(
