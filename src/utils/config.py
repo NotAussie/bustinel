@@ -83,8 +83,20 @@ HEADERS: dict[str, str] = {**_HEADERS, **_REQUIRED_HEADERS}
 SENTRY_DSN: str | None = _ENV.get("SENTRY_DSN", None)
 """Sentry DSN for error reporting. (default: None)"""
 
+_SENTRY_TRACES_SAMPLE_RATE = _ENV.get("SENTRY_TRACES_SAMPLE_RATE", "0.5")
+try:
+    SENTRY_TRACES_SAMPLE_RATE: float = float(_SENTRY_TRACES_SAMPLE_RATE)
+    """Sentry traces sample rate for performance monitoring. (default: 0.5)"""
+    if not (0.0 <= SENTRY_TRACES_SAMPLE_RATE <= 1.0):
+        raise ValueError("SENTRY_TRACES_SAMPLE_RATE must be between 0.0 and 1.")
+except ValueError:
+    raise ValueError(
+        f"Invalid SENTRY_TRACES_SAMPLE_RATE value: {_SENTRY_TRACES_SAMPLE_RATE}. "
+        "Must be a float between 0.0 and 1.0."
+    ) from None
+
 ENVIRONMENT: str = _ENV.get("ENVIRONMENT", "production")
-"""The environment in which the application is running (e.g., 'production', 'development')."""
+"""The environment in which the application is running (e.g., 'production', 'development', 'testing')."""
 
 if ENVIRONMENT not in ("production", "development", "testing"):
     raise ValueError(

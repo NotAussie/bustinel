@@ -51,7 +51,7 @@ if config.SENTRY_DSN:
             AsyncioIntegration(),
             AioHttpIntegration(),
         ],
-        traces_sample_rate=0.1,
+        traces_sample_rate=config.SENTRY_TRACES_SAMPLE_RATE,
         before_send=_sentry_before_send,
     )
 
