@@ -51,10 +51,14 @@ async def generate_gtfs_data() -> None:
     logger.info("downloading latest transit data")
 
     async with ClientSession() as session:
+        headers = config.HEADERS.copy()
+        headers["Accept"] = (
+            "application/zip, application/octet-stream"  # NOTE: Standard MIME types for ZIP files
+        )
         resp = await fetch_gtfs_feed(
             session,
             config.GOOGLE_TRANSIT_FILE_URL,
-            config.HEADERS,
+            headers,
         )
         raw_data = await resp.read()
 
