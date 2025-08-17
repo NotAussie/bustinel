@@ -1,83 +1,103 @@
-"""Main application entrypoint for the Bustinel project.
+"""Bustinel application entrypoint."""
 
-This module initializes logging, sets up the MongoDB connection,
-and starts the recorder task.
-"""
-
-import os
 import asyncio
 import logging
+import os
+from contextlib import asynccontextmanager
 
-from pythonjsonlogger.json import JsonFormatter
-
-from beanie import init_beanie
-from pymongo import AsyncMongoClient
-
+import logfire
 import sentry_sdk
-from sentry_sdk.types import Event
-from sentry_sdk.integrations.logging import LoggingIntegration
-from sentry_sdk.integrations.asyncio import AsyncioIntegration
-from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+from beanie import init_beanie
+from bubus import EventBus
+from pymongo import AsyncMongoClient
+from pythonjsonlogger.json import JsonFormatter
+from redis.asyncio import Redis
+from sentry_sdk.integrations.logging import EventHandler
+from tortoise import Tortoise
 
-from recorder import run_recorder
-from models import __models
-from utils import config
+from models.beanie import collections
+from services.meta import MetaService
+from services.realtime import RealtimeService
+from utilities import Settings
+
+bus = EventBus(parallel_handlers=True)
 
 # Logging
 handler = logging.StreamHandler()
 handler.setFormatter(JsonFormatter())
-logging.basicConfig(handlers=[handler], level=config.LOG_LEVEL)
-logger = logging.getLogger(__name__)
-
+logging.basicConfig(
+    level=logging.INFO,
+    handlers=[handler, EventHandler(logging.WARNING)],
+)
 
 # Sentry
-def _sentry_before_send(event: Event, _):
-    tags = event.get("tags")
-    if tags is None:
-        tags = {}
-        event["tags"] = tags
-    tags["feed"] = config.FEED_URL
-    return event
+sentry_sdk.init(
+    send_default_pii=True,
+    traces_sample_rate=1.0,
+    environment=Settings.ENVIRONMENT,
+)
+
+# Logfire
+logfire.configure(
+    environment=Settings.ENVIRONMENT,
+    service_name="bustinel",
+    console=False,
+)
+logfire.install_auto_tracing(
+    ["bubus", "tortoise", "beanie", "services"],
+    min_duration=100,
+    check_imported_modules="ignore",
+)
+logfire.log_slow_async_callbacks()
+logfire.instrument_pydantic()
+logfire.instrument_aiohttp_client()
+logfire.instrument_pymongo(True)
+logfire.instrument_sqlite3()
 
 
-if config.SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=config.SENTRY_DSN,
-        integrations=[
-            LoggingIntegration(
-                level=config.LOG_LEVEL,
-                event_level=logging.ERROR,
-            ),
-            AsyncioIntegration(),
-            AioHttpIntegration(),
-        ],
-        traces_sample_rate=config.SENTRY_TRACES_SAMPLE_RATE,
-        before_send=_sentry_before_send,
+@asynccontextmanager
+async def lifespan():
+    """Application lifespan context manager."""
+
+    os.makedirs("/app/data", exist_ok=True)
+    await Tortoise.init(
+        db_url="sqlite://data/db.sqlite3",
+        modules={"models": ["models.tortoise"]},
+    )
+    await Tortoise.generate_schemas()
+
+    mongo = AsyncMongoClient(
+        Settings.MONGODB_URI,
+    )
+    await init_beanie(
+        mongo[Settings.MONGODB_DATABASE], document_models=collections
     )
 
-# Initialisation
-os.makedirs("data", exist_ok=True)
-mongo = AsyncMongoClient(config.MONGODB_URL)
+    redis = Redis.from_url(Settings.REDIS_URI, decode_responses=True)
+
+    bus._start()  # pylint: disable=protected-access
+
+    services = [
+        MetaService(bus, redis),
+        RealtimeService(bus, redis),
+    ]
+
+    for service in services:
+        await service.start()
+    yield
+    for service in services:
+        await service.stop()
+
+    await bus.stop(timeout=5, clear=True)
+    await Tortoise.close_connections()
 
 
-async def main() -> None:
-    await init_beanie(mongo.bustinel, document_models=__models)
-
-    task = asyncio.create_task(run_recorder())
-
-    try:
-        await task
-    except asyncio.CancelledError:
-        logger.debug("recorder task was cancelled")
+async def main():
+    """Main application entrypoint."""
+    async with lifespan():
+        while True:
+            await asyncio.sleep(1)
 
 
-loop = asyncio.new_event_loop()
-try:
-    logger.info("starting")
-    loop.run_until_complete(main())
-    loop.run_forever()
-except KeyboardInterrupt:
-    loop.stop()
-finally:
-    loop.run_until_complete(loop.shutdown_asyncgens())
-    loop.close()
+if __name__ == "__main__":
+    asyncio.run(main())

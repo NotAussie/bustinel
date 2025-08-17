@@ -3,12 +3,11 @@ To build docker image use:
 ```bash
 docker build . \
  --tag ghcr.io/notaussie/bustinel:latest \
- --tag ghcr.io/notaussie/bustinel:stable \
- --tag ghcr.io/notaussie/bustinel:1.*.*
+ --tag ghcr.io/notaussie/bustinel:2.*.*
 ```
 
 To push the image to GitHub Container Registry, use:
 
 ```bash
-docker push ghcr.io/notaussie/bustinel:latest && docker push ghcr.io/notaussie/bustinel:stable && docker push ghcr.io/notaussie/bustinel:1.*.*
+docker push ghcr.io/notaussie/bustinel:latest && docker push ghcr.io/notaussie/bustinel:2.*.*
 ```

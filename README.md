@@ -2,6 +2,9 @@
 
 # Bustinel
 
+> ![WARNING]
+> Bustinel is undergoing a major rewrite and transition to use the `bubus` framework. Only use the `stable` releases, `latest` and `2.*.*` tags are unstable and may cause.
+
 A tool for generating historical vehicle trip data for analysation and statistical purposes.
 
 ## Why create this?
@@ -43,23 +46,3 @@ Configurable environment variables for Bustinel. Values labelled with required m
 
 | Variable Name               | Description                                                                             | Default Value                                           | Required |
 | --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------- |
-| `MONGODB_URL`               | The MongoDB connection URL for the Bustinel database.                                   | N/A                                                     | True     |
-| `FEED_URL`                  | The URL to the GTFS‑RT feed for vehicle positions.                                      | N/A                                                     | True     |
-| `GOOGLE_TRANSIT_FILE_URL`   | The URL to the Google Transit feed file.                                                | N/A                                                     | True     |
-| `FEED_UPDATE_INTERVAL`      | The interval in seconds to update the feed data.                                        | 60                                                      | False    |
-| `CONTACT_EMAIL`             | The host's contact email address for complaints or inquiries.                           | N/A                                                     | True     |
-| `LOG_LEVEL`                 | The logging level for the application.                                                  | info                                                    | False    |
-| `ENVIRONMENT`               | The environment the application is running in (e.g., production, development, testing). | production                                              | False    |
-| `ACCEPT`                    | The Accept header to be used for making requests to GTFS-RT feeds.                      | `application/x-google-protobuf, application/x-protobuf` | False    |
-| `SENTRY_DSN`                | The Sentry DSN for error reporting. (Recommended)                                       | N/A                                                     | False    |
-| `SENTRY_TRACES_SAMPLE_RATE` | The sample rate for traces sent to Sentry.                                              | 0.5                                                     | False    |
-
-## HTTP Headers
-
-Enforced HTTP headers for requests made by Bustinel.
-
-| Header Name  | Description                                                             |
-| ------------ | ----------------------------------------------------------------------- |
-| `User-Agent` | Bustinel <https://github.com/notaussie/bustinel>; contact: _Your email_ |
-| `From`       | _Your email_                                                            |
-| `Accept`     | application/x-google-protobuf, application/x-protobuf                   |
