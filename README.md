@@ -3,7 +3,7 @@
 # Bustinel
 
 > [!WARNING]
-> Bustinel is undergoing a major rewrite and transition to use the `bubus` framework. Only use the `stable` releases, `latest` and `2.*.*` tags are unstable and may cause.
+> Bustinel is undergoing a major rewrite and is not currently in a stable state. Docker tags `latest` and `2.*.*` are unstable and considered pre-release. Use at your own risk.
 
 A tool for generating historical vehicle trip data for analysation and statistical purposes.
 
