@@ -29,14 +29,17 @@ class ServiceBase(ABC):
         self._stop = asyncio.Event()
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    async def start(self):
+    async def start(self) -> asyncio.Task:
         """
         Asynchronously starts the service by creating and scheduling a task to run
         the `_run_wrapper` coroutine.
         Returns:
             asyncio.Task: The task object representing the scheduled `_run_wrapper` coroutine.
         """
-
+        if self._task and not self._task.done():
+            return self._task
+        if self._stop.is_set():
+            self._stop.clear()
         self._task = asyncio.create_task(self._run_wrapper())
         return self._task
 

@@ -18,7 +18,7 @@ from utilities import ServiceBase, Settings, pcall
 
 
 class MetaService(ServiceBase):
-    """Service for automaticity refreshing GTFS metadata."""
+    """Service for automatically refreshing GTFS metadata."""
 
     def __init__(self, bus: EventBus, redis: Redis):
         super().__init__(bus, redis)

@@ -47,7 +47,10 @@ async def pcall(
         if callable(coro) and inspect.iscoroutinefunction(coro):
             coro = coro()
 
-        result = await (coro() if callable(coro) else coro)
+        if not inspect.isawaitable(coro):
+            raise TypeError("Expected an awaitable or a coroutine function.")
+
+        result = await coro
         return result, True
     except handle if handle else (Exception,) as e:
         return e, False

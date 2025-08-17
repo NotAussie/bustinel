@@ -1,7 +1,7 @@
 """This utility provides application-wide setting management via Pydantic."""
 
-from pydantic import field_serializer
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -22,10 +22,10 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "production"
 
-    @field_serializer("ENVIRONMENT")
-    def serialize_environment(self, value: str) -> str:
-        """Serialize the environment setting."""
+    @field_validator("ENVIRONMENT", mode="before")
+    def validate_environment(self, value: str) -> str:
+        """Validate and normalize the environment setting."""
+        value = value.lower()
         if value not in ["production", "development", "testing"]:
             raise ValueError("Invalid environment value")
-
-        return value.lower()
+        return value

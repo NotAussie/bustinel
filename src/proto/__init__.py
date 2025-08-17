@@ -1,4 +1,4 @@
-"""This module defines GTFS-RT protocol classes./"""
+"""This module defines GTFS-RT protocol classes."""
 
 from .gtfsr_proto import Alert, FeedMessage, TripUpdate, VehiclePosition
 

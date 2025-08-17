@@ -72,7 +72,7 @@ class RealtimeService(ServiceBase):
                         "agency_id": route.agency_id,
                     },
                 )
-                return
+                continue
 
             record = Record(
                 vehicle=Vehicle(

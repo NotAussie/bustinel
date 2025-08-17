@@ -1,6 +1,5 @@
 # Framework
 bubus>=1.5.1
-# uvloop>=0.21.0
 
 # Databases
 tortoise-orm>=0.25.1

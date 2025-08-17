@@ -2,7 +2,7 @@
 
 # Bustinel
 
-> ![WARNING]
+> [!WARNING]
 > Bustinel is undergoing a major rewrite and transition to use the `bubus` framework. Only use the `stable` releases, `latest` and `2.*.*` tags are unstable and may cause.
 
 A tool for generating historical vehicle trip data for analysation and statistical purposes.
@@ -44,5 +44,5 @@ volumes:
 
 Configurable environment variables for Bustinel. Values labelled with required must be set before running the application, if these aren't provided the program will early exit with an error.
 
-| Variable Name               | Description                                                                             | Default Value                                           | Required |
-| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------- |
+| Variable Name | Description | Default Value | Required |
+| ------------- | ----------- | ------------- | -------- |

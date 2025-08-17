@@ -1,4 +1,4 @@
-"""This module initialises the events package by importing all necessary event classes."""
+"""This module initialises the tortoise models package by importing all necessary model classes."""
 
 from .agencies import Agencies
 from .routes import Routes
