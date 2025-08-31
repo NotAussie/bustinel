@@ -28,10 +28,12 @@ func main() {
 		Mongo:  client.Database("bustinel"),
 	}
 
-	// initial static fetch
-	services.FetchStaticData(ctx, app)
+	err := services.FetchStaticData(ctx, app)
+	if err != nil {
+		logger.Fatal("Error doing first fetch of static data", zap.Error(err))
+	}
 
-	_, err := c.AddFunc("*/1 * * * *", func() {
+	_, err = c.AddFunc("*/1 * * * *", func() {
 		if err := services.FetchVehiclePositions(ctx, app); err != nil {
 			logger.Error("Error fetching vehicle positions", zap.Error(err))
 		}
@@ -41,7 +43,8 @@ func main() {
 	}
 
 	_, err = c.AddFunc("0 * * * *", func() {
-		if err := services.FetchStaticData(ctx, app); err != nil {
+		err := services.FetchStaticData(ctx, app)
+		if err != nil {
 			logger.Error("Error fetching static data", zap.Error(err))
 		}
 	})

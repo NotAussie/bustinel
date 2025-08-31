@@ -1,7 +1,10 @@
 package models
 
-import "time"
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type VehicleType int
 
@@ -19,10 +22,17 @@ const (
 	VehicleTypeUnknown   VehicleType = 1000
 )
 
+type Route struct {
+	ID        string      `bson:"id" json:"id"`
+	ShortName *string     `bson:"short_name,omitempty" json:"short_name,omitempty"`
+	LongName  *string     `bson:"long_name,omitempty" json:"long_name,omitempty"`
+	Type      VehicleType `bson:"type" json:"type"`
+}
+
 type Trip struct {
 	ID        string `bson:"id" json:"id"`
-	Direction int    `bson:"direction" json:"direction"`
-	Route     string `bson:"route" json:"route"`
+	Direction string `bson:"direction" json:"direction"`
+	Route     Route  `bson:"route" json:"route"`
 }
 
 type Vehicle struct {
@@ -33,9 +43,10 @@ type Vehicle struct {
 }
 
 type Agency struct {
-	ID   string `bson:"id" json:"id"`
-	Name string `bson:"name" json:"name"`
-	URL  string `bson:"url" json:"url"`
+	ID       string `bson:"id" json:"id"`
+	Name     string `bson:"name" json:"name"`
+	URL      string `bson:"url" json:"url"`
+	Timezone string `bson:"timezone" json:"timezone"`
 }
 
 type Record struct {

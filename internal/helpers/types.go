@@ -1,9 +1,9 @@
 package helpers
 
 import (
+	"github.com/jamespfennell/gtfs"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
-	"github.com/jamespfennell/gtfs"
 )
 
 // App holds shared clients

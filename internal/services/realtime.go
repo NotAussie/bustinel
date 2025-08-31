@@ -7,6 +7,7 @@ import (
 
 	"github.com/jamespfennell/gtfs"
 	"github.com/notaussie/bustinel/internal/helpers"
+	"github.com/notaussie/bustinel/internal/models"
 	"go.uber.org/zap"
 )
 
@@ -48,8 +49,48 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 		return err
 	}
 
+	app.Logger.Info("Fetched vehicle positions", zap.Int("count", len(feed.Vehicles)))
+
 	for _, vehicle := range feed.Vehicles {
-		app.Logger.Info("Vehicle found", zap.String("vehicle_id", vehicle.ID.ID), zap.String("vehicle_label", vehicle.ID.Label), zap.String("trip_id", vehicle.Trip.ID.ID), zap.String("route_id", vehicle.Trip.ID.RouteID))
+		// Get static metadata
+		var route *gtfs.Route
+		for _, r := range app.Static.Routes {
+			if r.Id == vehicle.Trip.ID.RouteID {
+				route = &r
+				break
+			}
+		}
+		if route == nil {
+			app.Logger.Warn("Route not found for vehicle", zap.String("route_id", vehicle.Trip.ID.RouteID))
+			continue
+		}
+
+		record := models.Record{
+			Vehicle: models.Vehicle{
+				ID:    vehicle.ID.ID,
+				Label: &vehicle.ID.Label,
+				Plate: &vehicle.ID.LicensePlate,
+				Type:  models.VehicleType(route.Type),
+			},
+			Trip: models.Trip{
+				ID: vehicle.Trip.ID.ID,
+				Route: models.Route{
+					ID:        route.Id,
+					ShortName: &route.ShortName,
+					LongName:  &route.LongName,
+					Type:      models.VehicleType(route.Type),
+				},
+				Direction: vehicle.Trip.ID.DirectionID.String(),
+			},
+			Agency: models.Agency{
+				ID:       route.Agency.Id,
+				Name:     route.Agency.Name,
+				URL:      route.Agency.Url,
+				Timezone: route.Agency.Timezone,
+			},
+			Timestamp: *vehicle.Timestamp,
+		}
+		app.Logger.Info("Vehicle record", zap.Any("record", record))
 	}
 	return nil
 }

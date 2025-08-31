@@ -1,9 +1,0 @@
-{
-    "features": {
-        "ghcr.io/bartventer/arch-devcontainer-features/go:1": {
-            "installGox": true,
-            "installKo": true,
-            "golangciLintVersion": "latest"
-        }
-    }
-}
