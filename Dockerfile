@@ -1,19 +1,27 @@
-FROM python:3.13-slim-bookworm
-LABEL org.opencontainers.image.source="https://github.com/notaussie/bustinel"
-LABEL org.opencontainers.image.title="Bustinel"
-LABEL org.opencontainers.image.description="Bustinel is a Python application that generates trip records for GTFS-RT feeds."
-LABEL org.opencontainers.image.licenses="AGPL-3.0-only"
-LABEL org.opencontainers.image.authors="NotAussie <notaussie@duck.com>"
-LABEL org.opencontainers.image.vendor="NotAussie"
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-COPY ./src /app
-COPY ./requirements.txt /app
+# Copy go mod and sum files
+COPY go.mod go.sum ./
+RUN go mod download
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Copy the source code
+COPY . .
 
-ENV PYTHONUNBUFFERED=1
+# Build the Go app (assuming main is in cmd/collector.go)
+RUN go build -o collector ./cmd/collector.go
 
-CMD ["python", "app.py"]
+# Final image
+FROM alpine:latest
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /app/collector .
+
+# Use non-root user for security
+RUN adduser -D appuser
+USER appuser
+
+CMD ["./collector"]

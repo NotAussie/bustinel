@@ -2,64 +2,71 @@
 
 # Bustinel
 
-A tool for generating historical vehicle trip data for analysation and statistical purposes.
+A lightweight microservice for archiving GTFS-RT trips.
 
-## Why create this?
+## 💡 Features
 
-The story that lead to Bustinel's creation is a weird and kinda goofy one. I'm a public transport photographer and enthusiast, my local transit has some pretty cool experimental vehicles and I've had them on my photography bucket list for awhile, annoyingly they aren't in service often and when they are they only service a select few routes, so I thought making an entire framework for generating historical trips would be a fun way to solve this problem. _(Yes I know I could of rang my agency, but what's the fun in that?)_
+- Written in Go, performing ~10x faster than both `v1` and `v2`.
+- Forward-compatible-only changes.  
 
-## Usage
+## ❓ Why Create This?
 
-I recommend hosting Bustinel via docker compose, especially if you're using multiple sources _(for example if you wanted to track multiple agencies or multiple agency sources)_. To use it with Docker compose you'll need a `compose.yml` file, we provide an example of what that'll look like inside `example.compose.yml`, I recommend using that as a base.
+Bustinel came about as a solution to a niche problem of mine, I'm a photographer and public transport enthusiast. And my local agency _(Adelaide Metro)_ has a few experimental vehicles they operate periodically, my goal has been to photograph and ride these buses, annoying due to their inconsistent schedule I had to get creative to track them down... this being the result of getting creative. 
 
-An example `compose.yml` file would look like this:
+## ✨ Start Tracking
 
-```yaml
-services:
-  analytics:
-    image: ghcr.io/notaussie/bustinel:latest
-    depends_on:
-      - mongo
-    environment:
-      MONGODB_URL: mongodb://mongo:27017/bustinel
-      GOOGLE_TRANSIT_FILE_URL: https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip
-      FEED_URL: https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions
-      CONTACT_EMAIL: username@example.com
-    restart: always
+To start tracking agencies you'll need the following;
+1. [MongoDB](https://github.com/mongodb/mongo) or [FerretDB](https://github.com/FerretDB/FerretDB) instance.
+2. [Redis](https://github.com/redis/redis) or [DragonflyDB](https://github.com/dragonflydb/dragonfly) instance.
+3. [Docker](https://github.com/docker) or [Podman](https://mobyproject.org/).
 
-  mongo:
-    image: mongo:latest
-    restart: always
-    volumes:
-      - bustinel-mongo:/data/db
+>[!NOTE]
+> The example below assumes you're using MongoDB, DragonflyDB, and Podman, you may need to edit parts to reflect your setup.
 
-volumes:
-  bustinel-mongo:
+First we need a network so our services can interact, luckily Podman provides networks for this exact usecase.
+```bash
+$ podman network create bustinel
 ```
 
-## Environment Variables
+Before we can spin up our databases we'll need to allow them to store data, we can do this with Podman's `volume` tool.
+
+```bash
+$ podman volume create bustinel-mongodb
+```
+
+Now we've got a network and volume set up, we can spin up our databases.
+
+```
+$ podman run -d \
+  --name bustinel-dragonflydb \
+  --network bustinel \
+  docker.dragonflydb.io/dragonflydb/dragonfly
+```
+
+```
+$ podman run -d \
+  --name bustinel-mongo
+  --network bustinel \
+  mongo:noble
+```
+
+Now finally we can spin up our Bustinel instance, remember to set your feed and metadata urls to their respective counterparts.
+
+```bash
+$ podman run -d \
+  -e FEED_URL=https://example.com/vehicle-positions \
+  -e METADATA_URL=https://example.com/google.zip \
+  -e MONGO_URI=mongodb://bustinel-mongo:27017/bustinel \
+  -e REDIS_URI=redis://bustinel-dragonflydb:6379/0 \
+  -e EMAIL=johndoe@example.com \
+  ghcr.io/notaussie/bustinel:stable
+```
+
+
+
+## 🔑 Environment Variables
 
 Configurable environment variables for Bustinel. Values labelled with required must be set before running the application, if these aren't provided the program will early exit with an error.
 
-| Variable Name               | Description                                                                             | Default Value                                           | Required |
-| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------- |
-| `MONGODB_URL`               | The MongoDB connection URL for the Bustinel database.                                   | N/A                                                     | True     |
-| `FEED_URL`                  | The URL to the GTFS‑RT feed for vehicle positions.                                      | N/A                                                     | True     |
-| `GOOGLE_TRANSIT_FILE_URL`   | The URL to the Google Transit feed file.                                                | N/A                                                     | True     |
-| `FEED_UPDATE_INTERVAL`      | The interval in seconds to update the feed data.                                        | 60                                                      | False    |
-| `CONTACT_EMAIL`             | The host's contact email address for complaints or inquiries.                           | N/A                                                     | True     |
-| `LOG_LEVEL`                 | The logging level for the application.                                                  | info                                                    | False    |
-| `ENVIRONMENT`               | The environment the application is running in (e.g., production, development, testing). | production                                              | False    |
-| `ACCEPT`                    | The Accept header to be used for making requests to GTFS-RT feeds.                      | `application/x-google-protobuf, application/x-protobuf` | False    |
-| `SENTRY_DSN`                | The Sentry DSN for error reporting. (Recommended)                                       | N/A                                                     | False    |
-| `SENTRY_TRACES_SAMPLE_RATE` | The sample rate for traces sent to Sentry.                                              | 0.5                                                     | False    |
-
-## HTTP Headers
-
-Enforced HTTP headers for requests made by Bustinel.
-
-| Header Name  | Description                                                             |
-| ------------ | ----------------------------------------------------------------------- |
-| `User-Agent` | Bustinel <https://github.com/notaussie/bustinel>; contact: _Your email_ |
-| `From`       | _Your email_                                                            |
-| `Accept`     | application/x-google-protobuf, application/x-protobuf                   |
+| Variable Name | Description | Default Value | Required |
+| ------------- | ----------- | ------------- | -------- |
