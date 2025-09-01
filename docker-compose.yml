@@ -1,5 +1,34 @@
 services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    
+    volumes:
+      - mongodb:/data/db
+
+    networks:
+      - bustinel
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
+
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/bustinel
+      - FEED_URL=https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions
+      - METADATA_URL=https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip
+
+    depends_on:
+      - mongodb
+
+    networks:
+      - bustinel
+
+volumes:
+  mongodb:
+
+networks:
+  bustinel:
+    driver: bridge

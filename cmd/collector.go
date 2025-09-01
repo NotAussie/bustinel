@@ -21,14 +21,23 @@ func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	client, _ := mongo.Connect(options.Client().ApplyURI("mongodb://localhost:27017"))
-
 	app := &helpers.App{
 		Logger: logger,
-		Mongo:  client.Database("bustinel"),
+		Config: helpers.LoadConfigFromEnv(logger),
 	}
 
-	err := services.FetchStaticData(ctx, app)
+	client, err := mongo.Connect(options.Client().ApplyURI(app.Config.MongoURI))
+	if err != nil {
+		logger.Fatal("Failed to connect to MongoDB", zap.Error(err))
+	}
+	defer client.Disconnect(ctx)
+
+	app.Mongo = client.Database("bustinel")
+	app.Collections = &helpers.Collections{
+		Records: client.Database("bustinel").Collection("records"),
+	}
+
+	err = services.FetchStaticData(ctx, app)
 	if err != nil {
 		logger.Fatal("Error doing first fetch of static data", zap.Error(err))
 	}
@@ -54,11 +63,5 @@ func main() {
 
 	c.Start()
 	defer c.Stop()
-	defer func() {
-		if err = client.Disconnect(ctx); err != nil {
-			panic(err)
-		}
-	}()
-
 	select {}
 }

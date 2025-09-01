@@ -10,12 +10,13 @@ import (
 	"go.uber.org/zap"
 )
 
+
 func FetchStaticData(ctx context.Context, app *helpers.App) error {
 	client := &http.Client{}
 
 	app.Logger.Info("Fetching static data")
 
-	req, err := http.NewRequestWithContext(ctx, "GET", "https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", app.Config.MetadataURL, nil)
 	if err != nil {
 		app.Logger.Error("Failed to create request", zap.Error(err))
 		return err

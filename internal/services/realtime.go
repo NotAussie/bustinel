@@ -8,6 +8,7 @@ import (
 	"github.com/jamespfennell/gtfs"
 	"github.com/notaussie/bustinel/internal/helpers"
 	"github.com/notaussie/bustinel/internal/models"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 )
 
@@ -26,7 +27,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 
 	app.Logger.Info("Fetching vehicle positions")
 
-	req, err := http.NewRequestWithContext(ctx, "GET", "https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions", nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", app.Config.FeedURL, nil)
 	if err != nil {
 		app.Logger.Error("Failed to create request", zap.Error(err))
 		return err
@@ -51,6 +52,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 
 	app.Logger.Info("Fetched vehicle positions", zap.Int("count", len(feed.Vehicles)))
 
+	documents := []models.Record{}
 	for _, vehicle := range feed.Vehicles {
 		// Get static metadata
 		var route *gtfs.Route
@@ -80,7 +82,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 					LongName:  &route.LongName,
 					Type:      models.VehicleType(route.Type),
 				},
-				Direction: vehicle.Trip.ID.DirectionID.String(),
+				Direction: uint64(vehicle.Trip.ID.DirectionID),
 			},
 			Agency: models.Agency{
 				ID:       route.Agency.Id,
@@ -90,7 +92,34 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 			},
 			Timestamp: *vehicle.Timestamp,
 		}
-		app.Logger.Info("Vehicle record", zap.Any("record", record))
+
+		filter := map[string]interface{}{
+			"trip.id":     record.Trip.ID,
+			"agency.name": record.Agency.Name,
+			"agency.id":   record.Agency.ID,
+			"vehicle.id":  record.Vehicle.ID,
+		}
+		exists := app.Collections.Records.FindOne(ctx, filter)
+		if exists.Err() != nil {
+			if exists.Err() == mongo.ErrNoDocuments {
+				_, err = app.Collections.Records.InsertOne(ctx, record)
+				documents = append(documents, record)
+				app.Logger.Info("Trip record appended", zap.Any("record", record))
+				continue
+			}
+			app.Logger.Error("Failed to check for existing trip record", zap.Error(exists.Err()), zap.Any("filter", filter), zap.String("collection", app.Collections.Records.Name()))
+			continue
+		}
 	}
+
+	if len(documents) > 0 {
+		_, err := app.Collections.Records.InsertMany(ctx, documents)
+		if err != nil {
+			app.Logger.Error("Failed to insert documents", zap.Error(err))
+			return err
+		}
+		app.Logger.Info("Inserted new trip records", zap.Int("count", len(documents)))
+	}
+
 	return nil
 }

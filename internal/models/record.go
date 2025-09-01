@@ -31,7 +31,7 @@ type Route struct {
 
 type Trip struct {
 	ID        string `bson:"id" json:"id"`
-	Direction string `bson:"direction" json:"direction"`
+	Direction uint64 `bson:"direction" json:"direction"`
 	Route     Route  `bson:"route" json:"route"`
 }
 

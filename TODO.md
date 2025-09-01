@@ -1,4 +1,4 @@
 - [ ] `internal/services/static.go`: Implement last-modified support (using HEAD)
-- [ ] `internal/services/realtime.go`: Add MongoDB storage/existence checks.
-- [ ] `general`: Add ENV configuration support.
+- [x] `internal/services/realtime.go`: Add MongoDB storage/existence checks.
+- [x] `general`: Add ENV configuration support.
 - [ ] `general`: Add support for authentication through ENV variables.
