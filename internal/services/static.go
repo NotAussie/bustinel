@@ -19,6 +19,9 @@ func FetchStaticData(ctx context.Context, app *helpers.App) error {
 	// Create HTTP request
 	req, err := http.NewRequestWithContext(ctx, "GET", app.Config.MetadataURL, nil)
 	req.Header.Set("If-Modified-Since", app.LastModified)
+	if app.Config.Authorisation != nil {
+		req.Header.Set(app.Config.AuthorisationHeader, *app.Config.Authorisation)
+	}
 	if err != nil {
 		app.Logger.Error("Failed to create request", zap.Error(err))
 		return err

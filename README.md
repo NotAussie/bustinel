@@ -6,12 +6,12 @@ A lightweight microservice for archiving GTFS-RT trips.
 
 ## 💡 Features
 
-- Written in Go, performing ~10x faster than both `v1` and `v2`.
+- Written in Go, providing a faster and more efficient service compared to previous versions.
 - Forward-compatible-only changes.
 
 ## ❓ Why Create This?
 
-Bustinel came about as a solution to a niche problem of mine, I'm a photographer and public transport enthusiast. And my local agency _(Adelaide Metro)_ has a few experimental vehicles they operate periodically, my goal has been to photograph and ride these buses, annoying due to their inconsistent schedule I had to get creative to track them down... this being the result of getting creative.
+Bustinel came about as a solution to a niche problem of mine. I'm a photographer and public transport enthusiast, and my local agency _(Adelaide Metro)_ has a few experimental vehicles they operate periodically. My goal has been to photograph and ride these buses, and annoyingly, due to their inconsistent schedule, I had to get creative to track them down... this being the result of getting creative.
 
 ## ✨ Start Tracking
 

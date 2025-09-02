@@ -36,7 +36,7 @@ To create a new version simply use Git tags. For example:
 git tag v1.0.0
 ```
 
-Our CI/CD pipeline will automatically build and publish to the GitHub container registery alongside allowing pkg.go.dev to index our new documentation.
+Our CI/CD pipeline will automatically build and publish to the GitHub container registry alongside allowing pkg.go.dev to index our new documentation.
 
 ## Code of Conduct
 
