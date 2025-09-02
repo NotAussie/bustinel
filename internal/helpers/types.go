@@ -1,3 +1,4 @@
+// Reusable application helpers
 package helpers
 
 import (
@@ -12,11 +13,12 @@ type Collections struct {
 	Records *mongo.Collection
 }
 
-// App holds shared clients
+// Shared application context
 type App struct {
-	Logger      *zap.Logger
-	Mongo       *mongo.Database
-	Static      *gtfs.Static
-	Collections *Collections
-	Config      models.Config
+	Logger       *zap.Logger
+	Mongo        *mongo.Database
+	Static       *gtfs.Static
+	Collections  *Collections
+	Config       models.Config
+	LastModified string
 }

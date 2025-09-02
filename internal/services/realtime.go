@@ -12,26 +12,17 @@ import (
 	"go.uber.org/zap"
 )
 
-// FetchVehiclePositions retrieves real-time vehicle position data from the MTA GTFS API,
-// parses the response, and logs each vehicle's information in JSON format.
-// It returns an error if any step in the request, response reading, or parsing fails.
-//
-// Parameters:
-//   - ctx: The context for controlling request cancellation and timeouts.
-//   - app: The application helper containing logger and configuration.
-//
-// Returns:
-//   - error: An error if the request, response reading, or parsing fails; otherwise, nil.
+// Retrieves real-time vehicle positions from a GTFS feed and stores new trip records in the database.
 func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 	client := &http.Client{}
 
-	app.Logger.Info("Fetching vehicle positions")
-
+	// Create HTTP request
 	req, err := http.NewRequestWithContext(ctx, "GET", app.Config.FeedURL, nil)
 	if err != nil {
 		app.Logger.Error("Failed to create request", zap.Error(err))
 		return err
 	}
+	app.Logger.Info("Fetching vehicle positions", zap.String("url", app.Config.FeedURL))
 	resp, err := client.Do(req)
 	if err != nil {
 		app.Logger.Error("Failed to perform request", zap.Error(err))
@@ -44,6 +35,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 		return err
 	}
 
+	// Parse GTFS real-time feed
 	feed, err := gtfs.ParseRealtime(body, &gtfs.ParseRealtimeOptions{})
 	if err != nil {
 		app.Logger.Error("Failed to parse feed", zap.Error(err))
@@ -52,6 +44,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 
 	app.Logger.Info("Fetched vehicle positions", zap.Int("count", len(feed.Vehicles)))
 
+	// Loop through each vehicle and process it
 	documents := []models.Record{}
 	for _, vehicle := range feed.Vehicles {
 		// Get static metadata
@@ -67,6 +60,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 			continue
 		}
 
+		// Assemble record
 		record := models.Record{
 			Vehicle: models.Vehicle{
 				ID:    vehicle.ID.ID,
@@ -93,6 +87,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 			Timestamp: *vehicle.Timestamp,
 		}
 
+		// Check if the trip already exists, if not append it
 		filter := map[string]interface{}{
 			"trip.id":     record.Trip.ID,
 			"agency.name": record.Agency.Name,
@@ -112,6 +107,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 		}
 	}
 
+	// Insert new trips to the database
 	if len(documents) > 0 {
 		_, err := app.Collections.Records.InsertMany(ctx, documents)
 		if err != nil {

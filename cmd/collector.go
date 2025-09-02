@@ -11,38 +11,52 @@ import (
 	"go.uber.org/zap"
 )
 
-// Main initializes the application logger, sets up a cron job to periodically fetch vehicle positions,
-// and starts the cron scheduler. The cron job runs every minute and logs any errors encountered during
-// the fetch operation. The function blocks indefinitely to keep the application running.
+// Application entry point
 func main() {
 	ctx := context.Background()
-	c := cron.New()
 
+	// Initialise logging
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
 	app := &helpers.App{
 		Logger: logger,
-		Config: helpers.LoadConfigFromEnv(logger),
+		Config: helpers.LoadConfig(logger),
 	}
 
+	// Connect to MongoDB
 	client, err := mongo.Connect(options.Client().ApplyURI(app.Config.MongoURI))
 	if err != nil {
 		logger.Fatal("Failed to connect to MongoDB", zap.Error(err))
 	}
 	defer client.Disconnect(ctx)
 
+	// Test MongoDB connection
+	err = client.Ping(ctx, nil)
+	if err != nil {
+		logger.Fatal("Failed to ping MongoDB", zap.Error(err))
+	}
+	logger.Info("MongoDB connection established")
+
+	// Set up MongoDB database and collections
 	app.Mongo = client.Database("bustinel")
 	app.Collections = &helpers.Collections{
 		Records: client.Database("bustinel").Collection("records"),
 	}
 
+	// Pre-fetch the GTFS feed's static data
 	err = services.FetchStaticData(ctx, app)
 	if err != nil {
 		logger.Fatal("Error doing first fetch of static data", zap.Error(err))
 	}
 
-	_, err = c.AddFunc("*/1 * * * *", func() {
+	// Create CRON jobs
+	c := cron.New()
+	c.Start()
+	defer c.Stop()
+
+	// Vehicle positions
+	_, err = c.AddFunc(app.Config.FeedRefreshInterval, func() {
 		if err := services.FetchVehiclePositions(ctx, app); err != nil {
 			logger.Error("Error fetching vehicle positions", zap.Error(err))
 		}
@@ -51,7 +65,8 @@ func main() {
 		logger.Error("Error adding cron job", zap.Error(err))
 	}
 
-	_, err = c.AddFunc("0 * * * *", func() {
+	// Static data
+	_, err = c.AddFunc(app.Config.MetadataRefreshInterval, func() {
 		err := services.FetchStaticData(ctx, app)
 		if err != nil {
 			logger.Error("Error fetching static data", zap.Error(err))
@@ -61,7 +76,6 @@ func main() {
 		logger.Error("Error adding cron job", zap.Error(err))
 	}
 
-	c.Start()
-	defer c.Stop()
+	defer logger.Info("Shutting down")
 	select {}
 }
