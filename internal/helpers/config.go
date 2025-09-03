@@ -84,14 +84,14 @@ func LoadConfig(logger *zap.Logger) models.Config {
 			}
 			return ""
 		}(),
-		Timeout: func() int64 {
+		Timeout: func() time.Duration {
 			if v := os.Getenv("TIMEOUT"); v != "" {
 				if parsed, err := strconv.Atoi(v); err == nil {
-					return int64(parsed)
+					return time.Duration(parsed) * time.Second
 				}
 				logger.Fatal("Invalid TIMEOUT value", zap.String("value", v))
 			}
-			return int64(30 * time.Second)
+			return 30 * time.Second
 		}(),
 	}
 }
