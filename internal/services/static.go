@@ -14,7 +14,7 @@ import (
 
 // Retrieves GTFS static data and stores the parsed data into the global app storage
 func FetchStaticData(ctx context.Context, app *helpers.App) error {
-	client := &http.Client{Timeout: 30 * time.Second}
+	client := &http.Client{Timeout: time.Duration(app.Config.Timeout)}
 
 	app.Logger.Info("Fetching static data", zap.String("url", app.Config.MetadataURL))
 

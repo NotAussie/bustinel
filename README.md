@@ -64,6 +64,7 @@ Configurable environment variables for Bustinel. Values labelled as required mus
 | `METADATA_URL`              | The URL of the GTFS metadata file                                | `nil`         | ✅       |
 | `METADATA_REFRESH_INTERVAL` | The interval at which to refresh the metadata in CRON format     | `0 * * * *`   | ❌       |
 | `CONTACT`                   | A contactable email address for complaints.                      | `nil`         | ✅       |
+| `TIMEOUT`                   | The timeout duration for requests in seconds                      | `30`          | ❌       |
 
 ## 🏆 Contributors
 
