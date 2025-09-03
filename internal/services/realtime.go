@@ -105,10 +105,9 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 		if exists.Err() != nil {
 			if exists.Err() == mongo.ErrNoDocuments {
 				documents = append(documents, record)
-				continue
+			} else {
+				app.Logger.Error("Failed to check for existing trip record", zap.Error(exists.Err()), zap.Any("filter", filter), zap.String("collection", app.Collections.Records.Name()))
 			}
-			app.Logger.Error("Failed to check for existing trip record", zap.Error(exists.Err()), zap.Any("filter", filter), zap.String("collection", app.Collections.Records.Name()))
-			continue
 		}
 	}
 
@@ -124,3 +123,4 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 
 	return nil
 }
+;.
