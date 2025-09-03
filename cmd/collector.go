@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/notaussie/bustinel/internal/helpers"
-	"github.com/notaussie/bustinel/internal/services"
+	"github.com/NotAussie/bustinel/internal/helpers"
+	"github.com/NotAussie/bustinel/internal/services"
 	"github.com/robfig/cron/v3"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"

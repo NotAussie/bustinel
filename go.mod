@@ -1,4 +1,4 @@
-module github.com/notaussie/bustinel
+module github.com/NotAussie/bustinel
 
 go 1.25
 

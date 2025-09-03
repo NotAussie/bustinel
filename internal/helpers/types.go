@@ -2,8 +2,8 @@
 package helpers
 
 import (
+	"github.com/NotAussie/bustinel/internal/models"
 	"github.com/jamespfennell/gtfs"
-	"github.com/notaussie/bustinel/internal/models"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.uber.org/zap"
 )

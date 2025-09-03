@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/NotAussie/bustinel/internal/helpers"
 	"github.com/jamespfennell/gtfs"
-	"github.com/notaussie/bustinel/internal/helpers"
 	"go.uber.org/zap"
 )
 

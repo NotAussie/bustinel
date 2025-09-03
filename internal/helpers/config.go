@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/notaussie/bustinel/internal/models"
+	"github.com/NotAussie/bustinel/internal/models"
 	"go.uber.org/zap"
 )
 
