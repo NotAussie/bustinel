@@ -24,12 +24,18 @@ func FetchStaticData(ctx context.Context, app *helpers.App) error {
 		app.Logger.Error("Failed to create request", zap.Error(err))
 		return err
 	}
+
+	// Set headers
 	if app.LastModified != "" {
 		req.Header.Set("If-Modified-Since", app.LastModified)
 	}
 	if app.Config.Authorisation != nil {
 		req.Header.Set(app.Config.AuthorisationHeader, *app.Config.Authorisation)
 	}
+	req.Header.Set("From", app.Config.Contact)
+	req.Header.Set("User-Agent", "Bustinel/v3 <https://github.com/NotAussie/bustinel>")
+
+	// Send request
 	resp, err := client.Do(req)
 	if err != nil {
 		app.Logger.Error("Failed to perform request", zap.Error(err))
