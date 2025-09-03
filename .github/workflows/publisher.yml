@@ -6,7 +6,6 @@ on:
       - master
     tags:
       - "v*"
-      - "stable"
 
 env:
   PACKAGE: ghcr.io/${{ github.repository }}
@@ -40,7 +39,6 @@ jobs:
           images: ${{ env.PACKAGE }}
           tags: |
             type=raw,value=latest,enable=true
-            type=raw,value=stable,enable=${{ github.ref_type == 'tag' && github.ref_name == 'stable' }}
             type=sha
             type=ref,event=branch
             type=semver,pattern={{version}}
