@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/notaussie/bustinel/internal/helpers"
 	"github.com/notaussie/bustinel/internal/services"
@@ -13,7 +16,8 @@ import (
 
 // Application entry point
 func main() {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	// Initialise logging
 	logger, _ := zap.NewProduction()
@@ -39,9 +43,9 @@ func main() {
 	logger.Info("MongoDB connection established")
 
 	// Set up MongoDB database and collections
-	app.Mongo = client.Database("bustinel")
+	app.Mongo = client.Database(app.Config.MongoDatabase)
 	app.Collections = &helpers.Collections{
-		Records: client.Database("bustinel").Collection("records"),
+		Records: app.Mongo.Collection("records"),
 	}
 
 	// Pre-fetch the GTFS feed's static data
@@ -76,6 +80,6 @@ func main() {
 		logger.Error("Error adding cron job", zap.Error(err))
 	}
 
+	<-ctx.Done()
 	defer logger.Info("Shutting down")
-	select {}
 }

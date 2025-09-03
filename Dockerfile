@@ -22,6 +22,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/collector .
+RUN apk add --no-cache ca-certificates
 
 RUN adduser -D bustinel
 USER bustinel

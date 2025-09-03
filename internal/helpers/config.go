@@ -4,6 +4,7 @@ package helpers
 import (
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/notaussie/bustinel/internal/models"
 	"go.uber.org/zap"
@@ -26,6 +27,12 @@ func LoadConfig(logger *zap.Logger) models.Config {
 			}
 			logger.Fatal("Missing required environment variable", zap.String("key", "MONGO_URI"))
 			return ""
+		}(),
+		MongoDatabase: func() string {
+			if v := strings.TrimSpace(os.Getenv("MONGO_DATABASE")); v != "" {
+				return v
+			}
+			return "bustinel"
 		}(),
 		FeedURL: func() string {
 			if v := os.Getenv("FEED_URL"); v != "" {
@@ -51,7 +58,7 @@ func LoadConfig(logger *zap.Logger) models.Config {
 			if v := os.Getenv("FEED_REFRESH_INTERVAL"); v != "" {
 				return v
 			}
-			return "*/1 * * * *"
+			return "* * * * *"
 		}(),
 		Authorisation: func() *string {
 			if v := os.Getenv("AUTHORIZATION"); v != "" {

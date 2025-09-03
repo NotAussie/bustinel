@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"errors"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/jamespfennell/gtfs"
 	"github.com/notaussie/bustinel/internal/helpers"
@@ -14,7 +16,7 @@ import (
 
 // Retrieves real-time vehicle positions from a GTFS feed and stores new trip records in the database.
 func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
-	client := &http.Client{}
+	client := &http.Client{Timeout: 30 * time.Second}
 
 	// Create HTTP request
 	req, err := http.NewRequestWithContext(ctx, "GET", app.Config.FeedURL, nil)
@@ -27,6 +29,10 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 	if err != nil {
 		app.Logger.Error("Failed to perform request", zap.Error(err))
 		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		app.Logger.Error("Unexpected response status", zap.Int("status", resp.StatusCode))
+		return errors.New("unexpected response status: " + resp.Status)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
@@ -49,9 +55,10 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 	for _, vehicle := range feed.Vehicles {
 		// Get static metadata
 		var route *gtfs.Route
-		for _, r := range app.Static.Routes {
-			if r.Id == vehicle.Trip.ID.RouteID {
-				route = &r
+		static := app.Static // Snapshot static data to prevent race conditions
+		for i := range static.Routes {
+			if static.Routes[i].Id == vehicle.Trip.ID.RouteID {
+				route = &static.Routes[i]
 				break
 			}
 		}
@@ -84,7 +91,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 				URL:      route.Agency.Url,
 				Timezone: route.Agency.Timezone,
 			},
-			Timestamp: *vehicle.Timestamp,
+			Timestamp: time.Now().UTC(),
 		}
 
 		// Check if the trip already exists, if not append it
@@ -97,9 +104,7 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 		exists := app.Collections.Records.FindOne(ctx, filter)
 		if exists.Err() != nil {
 			if exists.Err() == mongo.ErrNoDocuments {
-				_, err = app.Collections.Records.InsertOne(ctx, record)
 				documents = append(documents, record)
-				app.Logger.Info("Trip record appended", zap.Any("record", record))
 				continue
 			}
 			app.Logger.Error("Failed to check for existing trip record", zap.Error(exists.Err()), zap.Any("filter", filter), zap.String("collection", app.Collections.Records.Name()))

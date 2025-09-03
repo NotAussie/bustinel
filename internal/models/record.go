@@ -4,7 +4,7 @@ package models
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type VehicleType int
@@ -56,9 +56,9 @@ type Agency struct {
 
 // Represents a unique trip that a vehicle has taken
 type Record struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Vehicle   Vehicle            `bson:"vehicle" json:"vehicle"`
-	Trip      Trip               `bson:"trip" json:"trip"`
-	Agency    Agency             `bson:"agency" json:"agency"`
-	Timestamp time.Time          `bson:"timestamp" json:"timestamp"`
+	ID        bson.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Vehicle   Vehicle       `bson:"vehicle" json:"vehicle"`
+	Trip      Trip          `bson:"trip" json:"trip"`
+	Agency    Agency        `bson:"agency" json:"agency"`
+	Timestamp time.Time     `bson:"timestamp" json:"timestamp"`
 }

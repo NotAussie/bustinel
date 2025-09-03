@@ -45,7 +45,7 @@ services:
       - FEED_URL=https://example.com/vehicle-positions
       - METADATA_URL=https://example.com/google.zip
       - MONGO_URI=mongodb://ferretdb:27017/bustinel
-      - EMAIL=johndoe@example.com
+      - CONTACT=johndoe@example.com
 
 networks:
   default:
@@ -60,10 +60,10 @@ Configurable environment variables for Bustinel. Values labelled as required mus
 | --------------------------- | ---------------------------------------------------------------- | ------------- | -------- |
 | `MONGO_URI`                 | The connection string for your MongoDB instance                  | `nil`         | ✅       |
 | `FEED_URL`                  | The URL of the GTFS-RT feed                                      | `nil`         | ✅       |
-| `FEED_REFRESH_INTERVAL`     | The interval at which to refresh the GTFS-RT feed in CRON format | `0 * * * *`   | ❌       |
+| `FEED_REFRESH_INTERVAL`     | The interval at which to refresh the GTFS-RT feed in CRON format | `* * * * *`   | ❌       |
 | `METADATA_URL`              | The URL of the GTFS metadata file                                | `nil`         | ✅       |
-| `METADATA_REFRESH_INTERVAL` | The interval at which to refresh the metadata in CRON format     | `*/1 * * * *` | ❌       |
-| `CONTACT`                   | The host email address to provide when making requests.          | `nil`         | ✅       |
+| `METADATA_REFRESH_INTERVAL` | The interval at which to refresh the metadata in CRON format     | `0 * * * *`   | ❌       |
+| `CONTACT`                   | A contactable email address for complaints.                      | `nil`         | ✅       |
 
 ## 🏆 Contributors
 

@@ -25,7 +25,7 @@ services:
       dockerfile: Dockerfile
 
     environment:
-      - MONGO_URI=mongodb://bustinel:atotallysecurepassword@ferretdb:27017/bustinel
+      - MONGO_URI=mongodb://bustinel:atotallysecurepassword@ferretdb:27017
       - FEED_URL=https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions
       - METADATA_URL=https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip
       - CONTACT=johndoe@example.com
