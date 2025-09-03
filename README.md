@@ -69,4 +69,17 @@ Configurable environment variables for Bustinel. Values labelled as required mus
 ## 🏆 Contributors
 
 <!-- readme: collaborators,contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/NotAussie">
+                    <img src="https://avatars.githubusercontent.com/u/123055696?v=4" width="100;" alt="NotAussie"/>
+                    <br />
+                    <sub><b>Aussie</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: collaborators,contributors -end -->
