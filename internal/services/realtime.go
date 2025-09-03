@@ -39,11 +39,11 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 		app.Logger.Error("Failed to perform request", zap.Error(err))
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		app.Logger.Error("Unexpected response status", zap.Int("status", resp.StatusCode))
 		return errors.New("unexpected response status: " + resp.Status)
 	}
-	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		app.Logger.Error("Failed to read response body", zap.Error(err))
