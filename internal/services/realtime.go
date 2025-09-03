@@ -123,4 +123,3 @@ func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
 
 	return nil
 }
-;.
