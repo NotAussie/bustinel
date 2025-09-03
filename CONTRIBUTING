@@ -1,0 +1,43 @@
+# Contributing to Bustinel
+
+G'day, thanks for showing interest in contributing to Bustinel, below you'll find information on how to contribute!
+
+## Getting Started
+
+We provide a docker compose file (`docker-compose.yml`) to help keep environments consistent. To spin up a development environment, simply run:
+
+```bash
+docker compose up
+```
+
+This will start up PostgreSQL and FerretDB alongside the application itself.
+
+## Making Changes
+
+When making changes, please ensure the following:
+
+1. Follow the existing code style and conventions.
+2. Document any new/changed functions with a clear and short summary. (E.g. "Retrieves GTFS static data and stores the parsed data into the global app storage")
+3. All commits should follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+4. All changes should be thoroughly tested before being submitted.
+
+## Submitting Changes
+
+Once you've completed your changes, please submit a pull request. Be sure to include a summary of your changes and any relevant issue numbers. Before a change is merged a review will be conducted on your changes, if any changes are requested they must be addressed before the pull request can be merged.
+
+## Publishing Versions
+
+>[!WARNING]
+> This segment is intended for project leaders.
+
+To create a new version simply use Git tags. For example:
+
+```bash
+git tag v1.0.0
+```
+
+Our CI/CD pipeline will automatically build and publish to the GitHub container registry alongside allowing pkg.go.dev to index our new documentation.
+
+## Code of Conduct
+
+Please note that all contributors are expected to adhere to our [Code of Conduct](https://github.com/NotAussie/bustinel/blob/master/CODE_OF_CONDUCT) while participating in the project.

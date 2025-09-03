@@ -2,64 +2,70 @@
 
 # Bustinel
 
-A tool for generating historical vehicle trip data for analysation and statistical purposes.
+A lightweight microservice for archiving GTFS-RT trips.
 
-## Why create this?
+## 💡 Features
 
-The story that lead to Bustinel's creation is a weird and kinda goofy one. I'm a public transport photographer and enthusiast, my local transit has some pretty cool experimental vehicles and I've had them on my photography bucket list for awhile, annoyingly they aren't in service often and when they are they only service a select few routes, so I thought making an entire framework for generating historical trips would be a fun way to solve this problem. _(Yes I know I could of rang my agency, but what's the fun in that?)_
+- Written in Go, providing a faster and more efficient service compared to previous versions.
+- Forward-compatible-only changes.
 
-## Usage
+## ❓ Why Create This?
 
-I recommend hosting Bustinel via docker compose, especially if you're using multiple sources _(for example if you wanted to track multiple agencies or multiple agency sources)_. To use it with Docker compose you'll need a `compose.yml` file, we provide an example of what that'll look like inside `example.compose.yml`, I recommend using that as a base.
+Bustinel came about as a solution to a niche problem of mine. I'm a photographer and public transport enthusiast, and my local agency _(Adelaide Metro)_ has a few experimental vehicles they operate periodically. My goal has been to photograph and ride these buses, and annoyingly, due to their inconsistent schedule, I had to get creative to track them down... this being the result of getting creative.
 
-An example `compose.yml` file would look like this:
+## ✨ Start Tracking
 
-```yaml
+To start tracking first you'll need either a [Docker](https://docs.docker.com/) or [Podman](https://podman.io/) installation and either [MongoDB](https://www.mongodb.com/) or [FerretDB](https://ferretdb.com/).
+
+### 🐋 Docker Compose
+
+The compose file below features a [FerretDB](https://ferretdb.com/) instance and Bustinel _(v3)_ instance in a production ready state.
+
+```yml
 services:
-  analytics:
-    image: ghcr.io/notaussie/bustinel:latest
-    depends_on:
-      - mongo
+  postgres:
+    image: ghcr.io/ferretdb/postgres-documentdb:17-0.106.0-ferretdb-2.5.0
+    restart: on-failure
     environment:
-      MONGODB_URL: mongodb://mongo:27017/bustinel
-      GOOGLE_TRANSIT_FILE_URL: https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip
-      FEED_URL: https://gtfs.adelaidemetro.com.au/v1/realtime/vehicle_positions
-      CONTACT_EMAIL: username@example.com
-    restart: always
-
-  mongo:
-    image: mongo:latest
-    restart: always
+      - POSTGRES_USER=bustinel
+      - POSTGRES_PASSWORD=atotallysecurepassword
+      - POSTGRES_DB=postgres
     volumes:
-      - bustinel-mongo:/data/db
+      - ./data:/var/lib/postgresql/data
 
-volumes:
-  bustinel-mongo:
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb:2.5.0
+    restart: on-failure
+    environment:
+      - FERRETDB_POSTGRESQL_URL=postgres://bustinel:atotallysecurepassword@postgres:5432/postgres
+
+  bustinel:
+    image: ghcr.io/notaussie/bustinel:stable
+    environment:
+      - FEED_URL=https://example.com/vehicle-positions
+      - METADATA_URL=https://example.com/google.zip
+      - MONGO_URI=mongodb://ferretdb:27017/bustinel
+      - CONTACT=johndoe@example.com
+
+networks:
+  default:
+    driver: bridge
 ```
 
-## Environment Variables
+## 🔑 Environment Variables
 
-Configurable environment variables for Bustinel. Values labelled with required must be set before running the application, if these aren't provided the program will early exit with an error.
+Configurable environment variables for Bustinel. Values labelled as required must be set or else the program will exit with a fatal error.
 
-| Variable Name               | Description                                                                             | Default Value                                           | Required |
-| --------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------- | -------- |
-| `MONGODB_URL`               | The MongoDB connection URL for the Bustinel database.                                   | N/A                                                     | True     |
-| `FEED_URL`                  | The URL to the GTFS‑RT feed for vehicle positions.                                      | N/A                                                     | True     |
-| `GOOGLE_TRANSIT_FILE_URL`   | The URL to the Google Transit feed file.                                                | N/A                                                     | True     |
-| `FEED_UPDATE_INTERVAL`      | The interval in seconds to update the feed data.                                        | 60                                                      | False    |
-| `CONTACT_EMAIL`             | The host's contact email address for complaints or inquiries.                           | N/A                                                     | True     |
-| `LOG_LEVEL`                 | The logging level for the application.                                                  | info                                                    | False    |
-| `ENVIRONMENT`               | The environment the application is running in (e.g., production, development, testing). | production                                              | False    |
-| `ACCEPT`                    | The Accept header to be used for making requests to GTFS-RT feeds.                      | `application/x-google-protobuf, application/x-protobuf` | False    |
-| `SENTRY_DSN`                | The Sentry DSN for error reporting. (Recommended)                                       | N/A                                                     | False    |
-| `SENTRY_TRACES_SAMPLE_RATE` | The sample rate for traces sent to Sentry.                                              | 0.5                                                     | False    |
+| Variable Name               | Description                                                      | Default Value | Required |
+| --------------------------- | ---------------------------------------------------------------- | ------------- | -------- |
+| `MONGO_URI`                 | The connection string for your MongoDB instance                  | `nil`         | ✅       |
+| `FEED_URL`                  | The URL of the GTFS-RT feed                                      | `nil`         | ✅       |
+| `FEED_REFRESH_INTERVAL`     | The interval at which to refresh the GTFS-RT feed in CRON format | `* * * * *`   | ❌       |
+| `METADATA_URL`              | The URL of the GTFS metadata file                                | `nil`         | ✅       |
+| `METADATA_REFRESH_INTERVAL` | The interval at which to refresh the metadata in CRON format     | `0 * * * *`   | ❌       |
+| `CONTACT`                   | A contactable email address for complaints.                      | `nil`         | ✅       |
 
-## HTTP Headers
+## 🏆 Contributors
 
-Enforced HTTP headers for requests made by Bustinel.
-
-| Header Name  | Description                                                             |
-| ------------ | ----------------------------------------------------------------------- |
-| `User-Agent` | Bustinel <https://github.com/notaussie/bustinel>; contact: _Your email_ |
-| `From`       | _Your email_                                                            |
-| `Accept`     | application/x-google-protobuf, application/x-protobuf                   |
+<!-- readme: collaborators,contributors -start -->
+<!-- readme: collaborators,contributors -end -->
