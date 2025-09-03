@@ -20,6 +20,7 @@ services:
       - postgres
 
   bustinel:
+    restart: on-failure
     build:
       context: .
       dockerfile: Dockerfile
