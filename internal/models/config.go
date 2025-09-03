@@ -13,4 +13,5 @@ type Config struct {
 	Authorisation           *string
 	AuthorisationHeader     string
 	Contact                 string
+	Timeout                 int64 // in seconds
 }

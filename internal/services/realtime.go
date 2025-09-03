@@ -16,7 +16,7 @@ import (
 
 // Retrieves real-time vehicle positions from a GTFS feed and stores new trip records in the database.
 func FetchVehiclePositions(ctx context.Context, app *helpers.App) error {
-	client := &http.Client{Timeout: 30 * time.Second}
+	client := &http.Client{Timeout: time.Duration(app.Config.Timeout)}
 
 	// Create HTTP request
 	req, err := http.NewRequestWithContext(ctx, "GET", app.Config.FeedURL, nil)

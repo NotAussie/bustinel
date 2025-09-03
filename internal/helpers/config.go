@@ -4,7 +4,9 @@ package helpers
 import (
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/NotAussie/bustinel/internal/models"
 	"go.uber.org/zap"
@@ -81,6 +83,15 @@ func LoadConfig(logger *zap.Logger) models.Config {
 				return ""
 			}
 			return ""
+		}(),
+		Timeout: func() int64 {
+			if v := os.Getenv("TIMEOUT"); v != "" {
+				if parsed, err := strconv.Atoi(v); err == nil {
+					return int64(parsed)
+				}
+				logger.Fatal("Invalid TIMEOUT value", zap.String("value", v))
+			}
+			return int64(30 * time.Second)
 		}(),
 	}
 }
